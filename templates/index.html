@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TERMO</title>
+
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet" />
+</head>
+
+<body>
+
+    <!-- ═══════════════ CABEÇALHO ═══════════════ -->
+    <header>
+        <h1>TERMO</h1>
+    </header>
+
+    <!-- ═══════════════ TOAST DE AVISO ═══════════════ -->
+    <!-- JS mostra/esconde adicionando a classe "visivel" -->
+    <div id="aviso" role="status" aria-live="polite"></div>
+
+    <!-- ═══════════════ TABULEIRO ═══════════════ -->
+    <!--
+      6 linhas (tentativas) × 5 células (letras)
+      JS vai:
+        - preencher o texto das células
+        - adicionar as classes: correta | presente | ausente
+        - adicionar a classe "flip" para animação
+        - adicionar "shake" na linha quando a palavra for inválida
+    -->
+    <div id="tabuleiro">
+
+        <div class="linha" id="linha-0">
+            <div class="celula" id="celula-0-0"></div>
+            <div class="celula" id="celula-0-1"></div>
+            <div class="celula" id="celula-0-2"></div>
+            <div class="celula" id="celula-0-3"></div>
+            <div class="celula" id="celula-0-4"></div>
+        </div>
+
+        <div class="linha" id="linha-1">
+            <div class="celula" id="celula-1-0"></div>
+            <div class="celula" id="celula-1-1"></div>
+            <div class="celula" id="celula-1-2"></div>
+            <div class="celula" id="celula-1-3"></div>
+            <div class="celula" id="celula-1-4"></div>
+        </div>
+
+        <div class="linha" id="linha-2">
+            <div class="celula" id="celula-2-0"></div>
+            <div class="celula" id="celula-2-1"></div>
+            <div class="celula" id="celula-2-2"></div>
+            <div class="celula" id="celula-2-3"></div>
+            <div class="celula" id="celula-2-4"></div>
+        </div>
+
+        <div class="linha" id="linha-3">
+            <div class="celula" id="celula-3-0"></div>
+            <div class="celula" id="celula-3-1"></div>
+            <div class="celula" id="celula-3-2"></div>
+            <div class="celula" id="celula-3-3"></div>
+            <div class="celula" id="celula-3-4"></div>
+        </div>
+
+        <div class="linha" id="linha-4">
+            <div class="celula" id="celula-4-0"></div>
+            <div class="celula" id="celula-4-1"></div>
+            <div class="celula" id="celula-4-2"></div>
+            <div class="celula" id="celula-4-3"></div>
+            <div class="celula" id="celula-4-4"></div>
+        </div>
+
+        <div class="linha" id="linha-5">
+            <div class="celula" id="celula-5-0"></div>
+            <div class="celula" id="celula-5-1"></div>
+            <div class="celula" id="celula-5-2"></div>
+            <div class="celula" id="celula-5-3"></div>
+            <div class="celula" id="celula-5-4"></div>
+        </div>
+
+    </div>
+    <!-- fim #tabuleiro -->
+
+    <!-- ═══════════════ TECLADO NA TELA ═══════════════ -->
+    <!--
+      data-letra  → qual letra a tecla representa (JS usa isso)
+      class="larga" → Enter e Apagar são mais largas
+      JS vai adicionar: correta | presente | ausente
+    -->
+    <div id="teclado">
+
+        <!-- Fileira 1: Q a P -->
+        <div class="fileira-teclado">
+            <button class="tecla" data-letra="Q">Q</button>
+            <button class="tecla" data-letra="W">W</button>
+            <button class="tecla" data-letra="E">E</button>
+            <button class="tecla" data-letra="R">R</button>
+            <button class="tecla" data-letra="T">T</button>
+            <button class="tecla" data-letra="Y">Y</button>
+            <button class="tecla" data-letra="U">U</button>
+            <button class="tecla" data-letra="I">I</button>
+            <button class="tecla" data-letra="O">O</button>
+            <button class="tecla" data-letra="P">P</button>
+        </div>
+
+        <!-- Fileira 2: A a L -->
+        <div class="fileira-teclado">
+            <button class="tecla" data-letra="A">A</button>
+            <button class="tecla" data-letra="S">S</button>
+            <button class="tecla" data-letra="D">D</button>
+            <button class="tecla" data-letra="F">F</button>
+            <button class="tecla" data-letra="G">G</button>
+            <button class="tecla" data-letra="H">H</button>
+            <button class="tecla" data-letra="J">J</button>
+            <button class="tecla" data-letra="K">K</button>
+            <button class="tecla" data-letra="L">L</button>
+        </div>
+
+        <!-- Fileira 3: Enter, Z a M, Apagar -->
+        <div class="fileira-teclado">
+            <button class="tecla larga" data-letra="ENTER">ENTER</button>
+            <button class="tecla" data-letra="Z">Z</button>
+            <button class="tecla" data-letra="X">X</button>
+            <button class="tecla" data-letra="C">C</button>
+            <button class="tecla" data-letra="V">V</button>
+            <button class="tecla" data-letra="B">B</button>
+            <button class="tecla" data-letra="N">N</button>
+            <button class="tecla" data-letra="M">M</button>
+            <button class="tecla larga" data-letra="APAGAR">⌫</button>
+        </div>
+
+    </div>
+    <!-- fim #teclado -->
+
+    <!-- ═══════════════ MODAL FIM DE JOGO ═══════════════ -->
+    <!--
+      JS remove "escondido" quando o jogo termina.
+      #modal-titulo  → "GANHOU!" ou "FIM DE JOGO"
+      #modal-palavra → a palavra correta (só aparece se perder)
+      #modal-mensagem → texto de apoio
+      #btn-reiniciar → chama reiniciarJogo() no JS
+    -->
+    <div id="modal" class="escondido" role="dialog" aria-modal="true">
+        <div id="modal-painel">
+            <p id="modal-titulo">GANHOU!</p>
+            <p id="modal-palavra"></p>
+            <p id="modal-mensagem">Você acertou em X tentativas.</p>
+            <button id="btn-reiniciar">JOGAR DE NOVO</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+    <!-- Colocado no final do body: HTML já carregou quando o JS rodar -->
+    <script src="script.js"></script>
+
+</body>
+
+</html>

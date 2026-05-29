@@ -1,0 +1,340 @@
+:root {
+    --cor-fundo: #0f0f0f;
+    --cor-painel: #1a1a1a;
+    --cor-borda: #333;
+    --cor-texto: #f0f0f0;
+    --cor-vazia: #1a1a1a;
+    --cor-correta: #538d4e;
+    /* verde  - letra no lugar certo  */
+    --cor-presente: #b59f3b;
+    /* amarelo- letra na palavra      */
+    --cor-ausente: #3a3a3c;
+    /* cinza  - letra ausente         */
+    --cor-digitando: #ffffff;
+    /* branco - célula ativa          */
+    --raio: 4px;
+    --tamanho-celula: 62px;
+    --gap: 6px;
+}
+
+/* ───────── RESET BÁSICO ───────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: 'Share Tech Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding-bottom: 32px;
+    overflow-x: hidden;
+}
+
+/* ───────── CABEÇALHO ───────── */
+header {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 18px 0 10px;
+    border-bottom: 1px solid var(--cor-borda);
+    margin-bottom: 24px;
+    position: relative;
+}
+
+header h1 {
+    font-family: 'Black Ops One', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 10px;
+    color: var(--cor-texto);
+    text-transform: uppercase;
+}
+
+/* ───────── AVISO / TOAST ───────── */
+/* Mensagens temporárias: "palavra inválida", "muito curto", etc. */
+#aviso {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--cor-texto);
+    color: var(--cor-fundo);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding: 10px 20px;
+    border-radius: var(--raio);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 999;
+    white-space: nowrap;
+}
+
+#aviso.visivel {
+    opacity: 1;
+}
+
+/* ───────── TABULEIRO ───────── */
+/* Grade principal: 6 tentativas x 5 letras */
+#tabuleiro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    margin-bottom: 28px;
+}
+
+/* Cada linha de tentativa */
+.linha {
+    display: flex;
+    gap: var(--gap);
+}
+
+/* Cada quadradinho de letra */
+.celula {
+    width: var(--tamanho-celula);
+    height: var(--tamanho-celula);
+    border: 2px solid var(--cor-borda);
+    border-radius: var(--raio);
+    background-color: var(--cor-vazia);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Black Ops One', sans-serif;
+    font-size: 2rem;
+    text-transform: uppercase;
+    color: var(--cor-texto);
+    user-select: none;
+
+    /* Animação de "pop" ao digitar letra */
+    transition: border-color 0.1s ease, transform 0.08s ease;
+}
+
+/* Célula que acabou de receber uma letra */
+.celula.preenchida {
+    border-color: #666;
+    transform: scale(1.06);
+}
+
+/* Estados após confirmação da linha (JS adiciona essas classes) */
+.celula.correta {
+    background-color: var(--cor-correta);
+    border-color: var(--cor-correta);
+}
+
+.celula.presente {
+    background-color: var(--cor-presente);
+    border-color: var(--cor-presente);
+}
+
+.celula.ausente {
+    background-color: var(--cor-ausente);
+    border-color: var(--cor-ausente);
+}
+
+/* Animação de flip ao revelar resultado */
+.celula.flip {
+    animation: flip 0.5s ease forwards;
+}
+
+/* Cada célula da linha tem um delay diferente (aplicado via JS: style.animationDelay) */
+@keyframes flip {
+    0% {
+        transform: scaleY(1);
+    }
+
+    49% {
+        transform: scaleY(0);
+    }
+
+    50% {
+        transform: scaleY(0);
+    }
+
+    /* troca a cor aqui no meio */
+    100% {
+        transform: scaleY(1);
+    }
+}
+
+/* Animação de shake na linha quando palavra inválida */
+.linha.shake {
+    animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-8px);
+    }
+
+    40% {
+        transform: translateX(8px);
+    }
+
+    60% {
+        transform: translateX(-6px);
+    }
+
+    80% {
+        transform: translateX(6px);
+    }
+}
+
+/* ───────── TECLADO NA TELA ───────── */
+#teclado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 500px;
+    padding: 0 8px;
+}
+
+/* Cada fileira de teclas */
+.fileira-teclado {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+
+/* Tecla individual */
+/* data-letra = a letra que ela representa */
+.tecla {
+    height: 56px;
+    min-width: 42px;
+    padding: 0 6px;
+    background-color: #818384;
+    border: none;
+    border-radius: var(--raio);
+    color: var(--cor-texto);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.08s ease;
+    user-select: none;
+}
+
+.tecla:active {
+    transform: scale(0.94);
+}
+
+/* Teclas especiais (Enter e Apagar) são mais largas */
+.tecla.larga {
+    min-width: 66px;
+    font-size: 0.72rem;
+}
+
+/* Feedback visual no teclado (mesmas cores do tabuleiro) */
+.tecla.correta {
+    background-color: var(--cor-correta);
+}
+
+.tecla.presente {
+    background-color: var(--cor-presente);
+}
+
+.tecla.ausente {
+    background-color: var(--cor-ausente);
+}
+
+/* ───────── MODAL FIM DE JOGO ───────── */
+#modal {
+    position: fixed;
+    inset: 0;
+    /* top/right/bottom/left = 0 */
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Classe que o JS adiciona/remove para mostrar/esconder */
+#modal.escondido {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Painel interno do modal */
+#modal-painel {
+    background-color: var(--cor-painel);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 36px 40px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    max-width: 340px;
+    width: 90%;
+}
+
+#modal-titulo {
+    font-family: 'Black Ops One', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+/* Mostra a palavra certa quando perde */
+#modal-palavra {
+    font-family: 'Black Ops One', sans-serif;
+    font-size: 1.1rem;
+    color: var(--cor-correta);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+}
+
+#modal-mensagem {
+    font-size: 0.85rem;
+    color: #aaa;
+    letter-spacing: 1px;
+    line-height: 1.5;
+}
+
+/* Botão de reiniciar dentro do modal */
+#btn-reiniciar {
+    margin-top: 8px;
+    padding: 12px 32px;
+    background-color: var(--cor-correta);
+    border: none;
+    border-radius: var(--raio);
+    color: #fff;
+    font-family: 'Black Ops One', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.1s ease;
+}
+
+#btn-reiniciar:hover {
+    filter: brightness(1.15);
+}
+
+#btn-reiniciar:active {
+    transform: scale(0.96);
+}
