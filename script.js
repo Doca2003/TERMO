@@ -1,25 +1,73 @@
-let PALAVRA_CERTA = "CARRO" //palavra sorteada
+let PALAVRA_CERTA = "" //palavra sorteada
 let tentativaAtual = 0 //que linha está(0 a 5)
 let letraAtual = 0 //que coluna esta(0 a 4)
 let jogoAtivo = true //false qnd acabar
-
+const TAMANHO_PALAVRA = 5
+const MAX_TENTATIVAS = 6
+let listaPalavras = []
 
 function sortearPalavra(){ //sortear palavra aleatoria do .json vindo do app.py
     fetch('palavras.json')
         .then(response => response.json())
         .then(palavras => {
             const indiceAleatorio = Math.floor(Math.random() * palavras.length);
-            const palavraSorteada = palavras[indiceAleatorio];
+            const palavraSorteada = palavras[indiceAleatorio]
+            PALAVRA_CERTA = palavras[indiceAleatorio].toUpperCase()
 
             console.log(palavraSorteada);
-            PALAVRA_CERTA = palavraSorteada.toUpperCase()
         });
+}
+
+function palavraExiste(tentativa){
+    const palavra = tentativa.join("").toLowerCase()
+    return listaPalavras.includes(palavra)
+}
+
+function contarLetras(palavra){ //contagem da palavra sorteada para decidir quais letras vao ficar amarelas
+    const frequencia = {}
+
+    for(let letra of palavra){
+        frequencia[letra] = (frequencia[letra] || 0) + 1
+    }
+    return frequencia
+}
+
+function marcarVerdes(tentativa, frequencia){ //retorna letras na posicao correta e a frequencia
+    const resultado = Array(5).fill(null)
+
+    for(let i = 0; i<TAMANHO_PALAVRA; i++){
+        if(tentativa[i] === PALAVRA_CERTA[i]){
+            resultado[i] = "correta"
+            frequencia[tentativa[i]]-- //consome a letra correta
+        }
+    }
+    return resultado
+}
+
+function marcarAmarelosECinzas(tentativa, frequencia, resultado){
+    for(let i = 0; i<TAMANHO_PALAVRA; i++){
+        //caso ja ficou verde, passa para a proxima
+        if(resultado[i] == "correta")
+            continue
+
+        const letra = tentativa[i]
+
+        if(frequencia[letra] > 0){
+            resultado[i] = "presente"
+
+            frequencia[letra]-- //consome a letra q existe, mas esta na pos errada
+        }else{
+            resultado[i] = "ausente"
+        }
+    }
+
+    return resultado
 }
 
 function inserirLetra(letra){
     
     if(!jogoAtivo) return //trava se o jogo acabou ou se a linha tiver cheia
-    if(letraAtual >= 5) return
+    if(letraAtual >= TAMANHO_PALAVRA) return
 
     //so aceita letras
     const apenasLetras = /^[a-zA-ZÀ-ú]$/
@@ -55,43 +103,105 @@ function apagarLetra(){
 
 }
 
-//logica do enter
 function processarEnter(){
-    if(letraAtual < 5){
+
+    if(!jogoAtivo)
+        return
+
+    if(letraAtual < TAMANHO_PALAVRA){
         mostrarAviso("Palavra incompleta!")
         return
     }
 
-    let todasVerdes = true
-    const palavraTentativa = pegarLetrasDaLinha()
+    const tentativa = pegarLetrasDaLinha()
 
-    for(let i = 0; i < 5; i++){
-        const celula = document.getElementById(`celula-${tentativaAtual}-${i}`)
-        const tecla = document.querySelector(`[data-letra="${palavraTentativa[i]}"]`)
+    if(!palavraExiste(tentativa)){
+        mostrarAviso("Palavra inválida!")
 
-        if(palavraTentativa[i] == PALAVRA_CERTA[i]){
+        const linha = document. getElementById(
+            `linha=${tentativaAtual}`
+        )
+
+        linha.classList.add("shake")
+
+        setTimeout(()=> {
+            linha.classList.remove("shake")
+        }, 400)
+
+        return
+    }
+
+    const frequencia = contarLetras(PALAVRA_CERTA)
+
+    let resultado = marcarVerdes(
+        tentativa,
+        frequencia
+    )
+
+    resultado = marcarAmarelosECinzas(
+        tentativa,
+        frequencia,
+        resultado
+    )
+
+    // pintar células e teclado
+    for(let i = 0; i < TAMANHO_PALAVRA; i++){
+
+        const celula = document.getElementById(
+            `celula-${tentativaAtual}-${i}`
+        )
+
+        const letra = tentativa[i]
+
+        const tecla = document.querySelector(
+            `[data-letra="${letra}"]`
+        )
+
+        if(resultado[i] === "correta"){
+
             celula.classList.add("correta")
-            if(tecla)
-                tecla.classList.add("correta")
 
-        } else if(PALAVRA_CERTA.includes(palavraTentativa[i])){
+            if(tecla){
+                tecla.classList.remove(
+                    "presente",
+                    "ausente"
+                )
+
+                tecla.classList.add("correta")
+            }
+
+        }else if(resultado[i] === "presente"){
+
             celula.classList.add("presente")
-            todasVerdes = false
-            if(tecla && !tecla.classList.contains("correta"))
+
+            if(
+                tecla &&
+                !tecla.classList.contains("correta")
+            ){
                 tecla.classList.add("presente")
-        } else {
+            }
+
+        }else{
+
             celula.classList.add("ausente")
-            todasVerdes = false
-            //pega a tecla com a letra e pinta 
-            if(tecla && !tecla.classList.contains("correta") && !tecla.classList.contains("presente")){
+
+            if(
+                tecla &&
+                !tecla.classList.contains("correta") &&
+                !tecla.classList.contains("presente")
+            ){
                 tecla.classList.add("ausente")
             }
         }
     }
 
+    const todasVerdes = resultado.every(
+        status => status === "correta"
+    )
+
     animarRevelacao(todasVerdes)
 
-    if(!todasVerdes && tentativaAtual < 5){
+    if(!todasVerdes && tentativaAtual < TAMANHO_PALAVRA){
         tentativaAtual++
         letraAtual = 0
     }
@@ -129,7 +239,7 @@ document.querySelectorAll('.tecla').forEach(tecla => {
 document.getElementById('btn-reiniciar').addEventListener('click', reiniciarJogo)
 
 function animarRevelacao(todasVerdes){ //passa parametro de tudo verde, que ganhou
-    for(let i= 0; i<5;i++){
+    for(let i= 0; i<TAMANHO_PALAVRA;i++){
         const celula = document.getElementById(`celula-${tentativaAtual}-${i}`)
         celula.style.animationDelay = `${i*150}ms`
         celula.classList.add("flip")
@@ -137,7 +247,7 @@ function animarRevelacao(todasVerdes){ //passa parametro de tudo verde, que ganh
     setTimeout(() => {
         if(todasVerdes){
             mostrarModal(true)
-        }else if(tentativaAtual == 5){
+        }else if(tentativaAtual === 5){
             mostrarModal(false)
         }
     }, 5 * 150 + 500)
@@ -147,7 +257,7 @@ function pegarLetrasDaLinha(){
 
     const letras = [] //array vazio
 
-    for(let i=0; i<5; i++){ //passa pegando uma letra de cada vez
+    for(let i=0; i<TAMANHO_PALAVRA; i++){ //passa pegando uma letra de cada vez
         const celula = document.getElementById(`celula-${tentativaAtual}-${i}`)
         letras.push(celula.textContent)
     }
@@ -165,6 +275,7 @@ function mostrarAviso(msg){
 }
 
 function mostrarModal(ganhou){
+    jogoAtivo = false
     const modal = document.getElementById('modal')
     const title = document.getElementById('modal-titulo')
     const word = document.getElementById('modal-palavra')
@@ -192,8 +303,8 @@ function reiniciarJogo(){
 
 
     //limpar todas as células
-    for(let linha = 0; linha<6; linha++){
-        for(let coluna = 0; coluna<5; coluna++){
+    for(let linha = 0; linha<MAX_TENTATIVAS; linha++){
+        for(let coluna = 0; coluna<TAMANHO_PALAVRA; coluna++){
             const celula = document.getElementById(`celula-${linha}-${coluna}`)
             celula.textContent = ""
             celula.classList.remove("correta", "presente", "ausente", "preenchida", "flip")
